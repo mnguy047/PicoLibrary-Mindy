@@ -42,7 +42,7 @@ class UltrasonicSensor(Sensor):
         self._trigger.off()
         utime.sleep_us(2)
         self._trigger.on()
-        utime.sleep_us(5)
+        utime.sleep_us(10)
         self._trigger.off()
         
         # Wait for echo to go high (with timeout)
@@ -69,14 +69,15 @@ class UltrasonicSensor(Sensor):
         return round(distance_cm, 2)
     
     def tripped(self)->bool:
-        """ sensor is tripped if distance is higher or lower than threshold """
-        
         v = self.rawValue()
-        if (self._lowActive and v < self._threshold) or (not self._lowActive and v > self._threshold):
-            Log.i(f"UltrasonicSensor {self._name}: sensor tripped")
-            return True
-        else:
+
+        if v <= 0:
             return False
+
+        if self._lowActive:
+            return v <= self._threshold
+
+        return v > self._threshold
 
 class GasSensor(Sensor):
     """
